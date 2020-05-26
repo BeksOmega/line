@@ -49,7 +49,7 @@ func isDiagonal(d image.Point) bool {
 func drawVert(p0, p1, d image.Point, plot BresenhamPlotter) {
 	inc := sign(d.Y)
 	x := p0.X
-	for y := p0.Y; y < p1.Y; y += inc {
+	for y := p0.Y; y != p1.Y; y += inc {
 		plot(x, y, 0)
 	}
 }
@@ -57,7 +57,7 @@ func drawVert(p0, p1, d image.Point, plot BresenhamPlotter) {
 func drawHoriz(p0, p1, d image.Point, plot BresenhamPlotter) {
 	inc := sign(d.X)
 	y := p0.Y
-	for x := p0.X; x < p1.X; x += inc {
+	for x := p0.X; x != p1.X; x += inc {
 		plot(x, y, 0)
 	}
 }
@@ -72,19 +72,22 @@ func drawDiagonal(p0, p1, d image.Point, plot BresenhamPlotter) {
 // bresenhamAll takes the input and modifies it so that it can be understood
 // by bresenham simple, which only supports lines with a slope between (0, 1).
 func bresenhamAll(p0, p1, d image.Point, plot BresenhamPlotter) {
+	newPlot := plot
 	if abs(d.X) < abs(d.Y) {  // Switch x and y.
-		plot = func (x, y, e int) {
+		newPlot = func (x, y, e int) {
 			plot(y, x, e)
 		}
 		p0 = image.Pt(p0.Y, p0.X)
+		p1 = image.Pt(p1.Y, p1.X)
 		d = image.Pt(d.Y, d.X)
 	}
 	if d.X < 0 {  // End is less than start.
 		temp := p0
 		p0 = p1
 		p1 = temp
+		d = d.Mul(-1)
 	}
-	bresenhamSimple(p0, p1, d, plot)
+	bresenhamSimple(p0, p1, d, newPlot)
 }
 
 // bresenhamSimple plots lines with a slope between (0, 1). Each pixel is
